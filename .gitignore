@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# uv / venv
+.venv/
+
+# Env files
+.env
+
+# IDE
+.idea/
+.junie/
+
+# OS
+.DS_Store
+
+# Agents
+.claude/

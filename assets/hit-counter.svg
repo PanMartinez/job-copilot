@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="70" viewBox="0 0 260 70">
+  <rect width="260" height="70" fill="#c0c0c0"/>
+  <rect x="3" y="3" width="254" height="64" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <rect x="5" y="5" width="252" height="62" fill="none" stroke="#404040" stroke-width="2"/>
+  <text x="130" y="20" text-anchor="middle" font-family="Verdana,Arial,sans-serif" font-size="11" fill="#000080" font-weight="bold">You are visitor number:</text>
+  <g font-family="'Courier New',monospace" font-size="30" font-weight="bold">
+    <rect x="30" y="28" width="28" height="34" fill="#000000"/><text x="44" y="54" text-anchor="middle" fill="#00ff00">0</text>
+    <rect x="62" y="28" width="28" height="34" fill="#000000"/><text x="76" y="54" text-anchor="middle" fill="#00ff00">0</text>
+    <rect x="94" y="28" width="28" height="34" fill="#000000"/><text x="108" y="54" text-anchor="middle" fill="#00ff00">7</text>
+    <rect x="126" y="28" width="28" height="34" fill="#000000"/><text x="140" y="54" text-anchor="middle" fill="#00ff00">4</text>
+    <rect x="158" y="28" width="28" height="34" fill="#000000"/><text x="172" y="54" text-anchor="middle" fill="#00ff00">8</text>
+    <rect x="190" y="28" width="28" height="34" fill="#000000"/>
+    <text x="204" y="54" text-anchor="middle" fill="#00ff00">
+      2
+      <animate attributeName="opacity" values="1;1;0.1;1" dur="2s" repeatCount="indefinite"/>
+    </text>
+  </g>
+</svg>

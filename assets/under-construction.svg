@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="60" viewBox="0 0 420 60">
+  <defs>
+    <pattern id="hazard" width="28" height="60" patternUnits="userSpaceOnUse" patternTransform="skewX(-30)">
+      <rect width="14" height="60" fill="#ffcc00"/>
+      <rect x="14" width="14" height="60" fill="#000000"/>
+    </pattern>
+  </defs>
+  <rect width="420" height="12" fill="url(#hazard)"/>
+  <rect y="48" width="420" height="12" fill="url(#hazard)"/>
+  <rect y="12" width="420" height="36" fill="#000000"/>
+  <text x="210" y="38" text-anchor="middle" font-family="Impact,'Arial Black',sans-serif"
+        font-size="20" fill="#ffcc00">
+    🚧 UNDER CONSTRUCTION 🚧
+    <animate attributeName="opacity" values="1;1;0;1" dur="1s" repeatCount="indefinite"/>
+  </text>
+</svg>

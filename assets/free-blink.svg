@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="90" viewBox="0 0 300 90">
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="-4 150 45;4 150 45;-4 150 45" dur="0.6s" repeatCount="indefinite"/>
+    <polygon points="150,2 168,22 194,10 200,36 228,34 220,60 246,70 226,84 150,88 74,84 54,70 80,60 72,34 100,36 106,10 132,22"
+             fill="#ff0000" stroke="#ffff00" stroke-width="4"/>
+    <text x="150" y="58" text-anchor="middle" font-family="Impact,'Arial Black',sans-serif" font-size="38" fill="#ffff00">
+      💥 FREE 💥
+      <animate attributeName="opacity" values="1;0;1" dur="0.8s" repeatCount="indefinite"/>
+    </text>
+  </g>
+</svg>

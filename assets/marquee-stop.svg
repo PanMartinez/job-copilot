@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="46" viewBox="0 0 860 46">
+  <rect width="860" height="46" fill="#000080"/>
+  <rect x="2" y="2" width="856" height="42" fill="none" stroke="#c0c0c0" stroke-width="2"/>
+  <rect x="4" y="4" width="852" height="38" fill="none" stroke="#808080" stroke-width="2"/>
+  <g font-family="'Comic Sans MS','Comic Sans',cursive" font-size="22" font-weight="bold">
+    <text y="32" fill="#ffff00">
+      <animate attributeName="x" values="860;-1400" dur="12s" repeatCount="indefinite"/>
+      🚨 STOP! 🚨 HEY YOU! YES, YOU! 👀 ARE YOU LOOKING FOR A NEW JOB??? 💼 KEEP SCROLLING FOR THE DEAL OF THE MILLENNIUM!!! 🚨
+    </text>
+  </g>
+</svg>

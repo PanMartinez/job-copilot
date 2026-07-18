@@ -1,0 +1,50 @@
+[project]
+name = "job-copilot"
+version = "0.1.0"
+description = "AI-powered assistant for managing a job search"
+authors = [
+    { name = "PanMartinez", email = "marcinplotka88@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.5",
+    "asyncpg>=0.31.0",
+    "celery>=5.6.3",
+    "fastapi>=0.139.2",
+    "pgvector>=0.5.0",
+    "psycopg>=3.3.4",
+    "pydantic-settings>=2.14.2",
+    "redis>=8.0.1",
+    "sqlalchemy>=2.0.51",
+    "uvicorn>=0.51.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pre-commit>=4.6.0",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.22",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+include = ["app", "tests", "alembic"]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="34" viewBox="0 0 860 34">
+  <defs>
+    <text id="row" y="24" font-size="18" xml:space="preserve">🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥 ⭐ 🔥</text>
+  </defs>
+  <use href="#row" x="0">
+    <animate attributeName="opacity" values="1;0.4;1" dur="0.8s" repeatCount="indefinite"/>
+  </use>
+</svg>
