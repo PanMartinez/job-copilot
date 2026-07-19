@@ -43,9 +43,7 @@ Do you have seventeen sticky notes scattered around your desk that say things li
 
 ### Introducing...
 
-# 🤖 THE JOB SEARCH COPILOT™*
-
-<sup>*not actually trademarked. it's a readme. relax.</sup>
+# 🤖 THE JOB SEARCH COPILOT*
 
 An AI-powered companion that takes the soul-crushing, mind-numbing,<br>
 keyboard-destroying parts of job hunting and says:
@@ -224,9 +222,8 @@ uv run pre-commit run --all-files
 
 <img src="assets/buttons-88x31.svg" alt="Made with robots | Free for LIFE! | Y2K compliant | Get me now" width="380">
 
-📖 [**~*~ SiGn My GuEsTbOoK ~*~**](../../issues/new) 📖 &nbsp;|&nbsp; 🔗 **Proud member of the Job Hunters WebRing** 🔗
+📖 [**~*~ SiGn My GuEsTbOoK ~*~**](../../issues/new) 📖
 
-<sub>© 2026 PanMartinez. All rights reserved.<br>
-No `<marquee>` tags were harmed in the making of this README — GitHub got to them first.</sub>
+<sub>© 2026 PanMartinez<br>
 
 </div>
