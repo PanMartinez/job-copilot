@@ -1,65 +1,81 @@
-services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: job_copilot
-    ports:
-      - "5442:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  db_test:
-    image: pgvector/pgvector:pg16
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: job_copilot_test
-    ports:
-      - "5433:5432"
-    tmpfs:
-      - /var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  app:
-    build: .
-    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    volumes:
-      - .:/app
-      - app_venv:/app/.venv
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/job_copilot
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/1
-      CELERY_RESULT_BACKEND: redis://redis:6379/2
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
-  app_venv:
+#services:
+#  postgres:
+#    image: pgvector/pgvector:pg16
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: job_copilot
+#    ports:
+#      - "5442:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U postgres"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#
+#  db_test:
+#    image: pgvector/pgvector:pg16
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: job_copilot_test
+#    ports:
+#      - "5433:5432"
+#    tmpfs:
+#      - /var/lib/postgresql/data
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U postgres"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#
+#  redis:
+#    image: redis:7-alpine
+#    ports:
+#      - "6379:6379"
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#
+#  app:
+#    build: .
+#    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+#    volumes:
+#      - .:/app
+#      - app_venv:/app/.venv
+#    ports:
+#      - "8000:8000"
+#    environment:
+#      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/job_copilot
+#      REDIS_URL: redis://redis:6379/0
+#      CELERY_BROKER_URL: redis://redis:6379/1
+#      CELERY_RESULT_BACKEND: redis://redis:6379/2
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#
+#  mcp:
+#    build: .
+#    # MCP's stdio transport expects a client to spawn a fresh process per session
+#    # (e.g. `docker compose exec -T mcp uv run python -m app.mcp.server`), not a
+#    # long-running listener - so this container just idles, staying up and ready
+#    # for `docker compose exec` alongside the rest of the stack.
+#    command: sleep infinity
+#    volumes:
+#      - .:/app
+#      - app_venv:/app/.venv
+#    environment:
+#      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/job_copilot
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
+#volumes:
+#  postgres_data:
+#  app_venv:

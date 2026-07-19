@@ -5,10 +5,18 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.db import Base, get_db
+from app.config.db import Base
+from app.config.dependencies import get_db
+from app.config.settings import get_settings
 from app.main import app
 
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5433/job_copilot_test"
+_settings = get_settings()
+# A separate physical database from the dev one, so tests never touch real data.
+# It must already exist with the `vector` extension enabled - see README.
+TEST_DATABASE_URL = (
+    f"postgresql+asyncpg://{_settings.db_user}:{_settings.db_password}"
+    f"@{_settings.db_host}:{_settings.db_port}/{_settings.db_name}_test"
+)
 
 test_engine = create_async_engine(TEST_DATABASE_URL)
 TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)

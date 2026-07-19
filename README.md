@@ -131,16 +131,10 @@ and the documents (CVs, interview feedback, company research) that go with them.
 ## Architecture
 
 ```
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│   FastAPI    │─────▶│  PostgreSQL  │      │    Celery    │
-│   (app/)     │      │  + pgvector  │      │   workers    │
-└──────┬───────┘      └──────────────┘      └──────┬───────┘
-       │                                           │
-       └───────────────────┬───────────────────────┘
-                           │
-                       ┌───▼───┐
-                       │ Redis │  (broker + result backend)
-                       └───────┘
+┌──────────────┐      ┌──────────────┐
+│   FastAPI    │─────▶│  PostgreSQL  │
+│   (app/)     │      │  + pgvector  │
+└──────────────┘      └──────────────┘
 
  MCP server │ RAG pipeline │ A2A agents
 ```
@@ -153,49 +147,16 @@ and the documents (CVs, interview feedback, company research) that go with them.
   matching them against your profile, and drafting tailored application
   material.
 
-## Quickstart
-
-Prerequisites: [uv](https://docs.astral.sh/uv/), Docker, Docker Compose.
-
-```bash
-# 1. Install dependencies
-uv sync
-
-# 2. Start Postgres (+pgvector), the test DB, and Redis
-docker compose up -d postgres db_test redis
-
-# 3. Enable pgvector on the databases (one-time, per fresh volume)
-docker compose exec postgres psql -U postgres -d job_copilot -c "CREATE EXTENSION IF NOT EXISTS vector;"
-docker compose exec db_test psql -U postgres -d job_copilot_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
-
-# 4. Copy env config
-cp .env.example .env
-
-# 5. Run migrations
-uv run alembic upgrade head
-
-# 6. Start the API
-uv run uvicorn app.main:app --reload
-
-# 7. (optional) Start a Celery worker in another terminal
-uv run celery -A app.core.celery_app worker --loglevel=info
-```
+### Quickstart guide will be here once the project will be ready
 
 The API is now at http://localhost:8000, docs at http://localhost:8000/docs.
 
-### Running the whole stack in Docker
-
-```bash
-docker compose up --build
-```
-
-### Tests
+Docker/Compose files are still present in the repo but are not currently used —
+the project runs directly against a local Postgres instance for now.
 
 ```bash
 uv run pytest
 ```
-
-Tests run against the `db_test` Postgres service (`docker compose up -d db_test`).
 
 ### Linting, formatting, type-checking
 
@@ -211,6 +172,13 @@ uv run pyright
 uv run pre-commit install
 uv run pre-commit run --all-files
 ```
+
+## MCP Server
+
+Job Search Copilot can be driven directly from Claude Desktop or Claude Code via an
+MCP server that wraps the same service layer as the REST API. See
+[`MCP README.md`](app/mcp/README.md) for the full tool list and a 2-minute Claude
+Desktop setup guide.
 
 <br>
 

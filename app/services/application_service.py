@@ -1,7 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.application import Application
+from app.models.application import Application, ApplicationStatus
+from app.models.job import Job
 from app.schemas.application import ApplicationCreate, ApplicationUpdate
 
 
@@ -22,6 +23,11 @@ async def get_application(db: AsyncSession, application_id: int) -> Application 
     return await db.get(Application, application_id)
 
 
+async def get_application_by_job_id(db: AsyncSession, job_id: int) -> Application | None:
+    result = await db.execute(select(Application).where(Application.job_id == job_id))
+    return result.scalars().first()
+
+
 async def update_application(
     db: AsyncSession, application: Application, data: ApplicationUpdate
 ) -> Application:
@@ -35,3 +41,23 @@ async def update_application(
 async def delete_application(db: AsyncSession, application: Application) -> None:
     await db.delete(application)
     await db.commit()
+
+
+async def get_pipeline(db: AsyncSession) -> dict[ApplicationStatus, list[dict]]:
+    """Return every application grouped by pipeline status, with job title/company inlined."""
+    result = await db.execute(
+        select(Application, Job).join(Job, Application.job_id == Job.id).order_by(Application.id)
+    )
+    pipeline: dict[ApplicationStatus, list[dict]] = {status: [] for status in ApplicationStatus}
+    for application, job in result.all():
+        pipeline[application.status].append(
+            {
+                "application_id": application.id,
+                "job_id": job.id,
+                "title": job.title,
+                "company": job.company,
+                "notes": application.notes,
+                "updated_at": application.updated_at,
+            }
+        )
+    return pipeline

@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.document import Document
+from app.models.document import Document, DocumentType
 from app.schemas.document import DocumentCreate, DocumentUpdate
 
 
@@ -13,8 +13,16 @@ async def create_document(db: AsyncSession, data: DocumentCreate) -> Document:
     return document
 
 
-async def list_documents(db: AsyncSession, limit: int = 100, offset: int = 0) -> list[Document]:
-    result = await db.execute(select(Document).order_by(Document.id).limit(limit).offset(offset))
+async def list_documents(
+    db: AsyncSession,
+    doc_type: DocumentType | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[Document]:
+    stmt = select(Document).order_by(Document.id)
+    if doc_type is not None:
+        stmt = stmt.where(Document.type == doc_type)
+    result = await db.execute(stmt.limit(limit).offset(offset))
     return list(result.scalars().all())
 
 
