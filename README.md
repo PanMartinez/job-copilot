@@ -141,8 +141,9 @@ and the documents (CVs, interview feedback, company research) that go with them.
 
 - **MCP server** — expose job-search tools (search jobs, log an application,
   pull up interview notes) to Claude Desktop/Code.
-- **RAG pipeline** — semantic search over CVs, interview feedback, and company
-  research, backed by the `pgvector` column already present on `Document`.
+- **RAG pipeline** — hybrid (pgvector + full-text) semantic search and cited,
+  Claude-generated answers over your CVs, interview feedback, and company
+  research. See [RAG Pipeline](#rag-pipeline) below.
 - **A2A multi-agent layer** — cooperating agents for sourcing candidate roles,
   matching them against your profile, and drafting tailored application
   material.
@@ -179,6 +180,15 @@ Job Search Copilot can be driven directly from Claude Desktop or Claude Code via
 MCP server that wraps the same service layer as the REST API. See
 [`MCP README.md`](app/mcp/README.md) for the full tool list and a 2-minute Claude
 Desktop setup guide.
+
+## RAG Pipeline
+
+Job Search Copilot answers questions and matches jobs against your own CVs, interview
+feedback, and company research via hybrid (pgvector + full-text) retrieval and
+Claude-generated, cited answers — exposed as `POST /rag/search`/`POST /rag/ask` and the
+MCP tools `search_knowledge_base`/`match_job`. See [`RAG README.md`](app/rag/README.md)
+for the architecture diagram, chunking strategy, embedding provider choice, and the
+hybrid-search/RRF tradeoff.
 
 <br>
 

@@ -1,8 +1,25 @@
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document, DocumentType
 from app.schemas.document import DocumentCreate, DocumentUpdate
+from app.tasks.ingestion import ingest_document as ingest_document_task
+
+logger = logging.getLogger(__name__)
+
+
+def _queue_ingestion(document_id: int) -> None:
+    """
+    a document save must succeed even if the broker
+    (Redis/Celery) is unreachable - the document just won't be searchable via
+    RAG until ingestion runs later, e.g. once a worker/broker is available.
+    """
+    try:
+        ingest_document_task.delay(document_id)
+    except Exception:
+        logger.warning("Failed to queue RAG ingestion for document %s", document_id, exc_info=True)
 
 
 async def create_document(db: AsyncSession, data: DocumentCreate) -> Document:
@@ -10,6 +27,7 @@ async def create_document(db: AsyncSession, data: DocumentCreate) -> Document:
     db.add(document)
     await db.commit()
     await db.refresh(document)
+    _queue_ingestion(document.id)
     return document
 
 
@@ -31,10 +49,13 @@ async def get_document(db: AsyncSession, document_id: int) -> Document | None:
 
 
 async def update_document(db: AsyncSession, document: Document, data: DocumentUpdate) -> Document:
-    for field, value in data.model_dump(exclude_unset=True).items():
+    changed_fields = data.model_dump(exclude_unset=True)
+    for field, value in changed_fields.items():
         setattr(document, field, value)
     await db.commit()
     await db.refresh(document)
+    if "content" in changed_fields:
+        _queue_ingestion(document.id)
     return document
 
 

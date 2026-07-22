@@ -169,6 +169,37 @@ async def list_documents(
     return await _run(handlers.list_documents, doc_type=type)
 
 
+@mcp.tool()
+async def search_knowledge_base(
+    query: Annotated[
+        str,
+        Field(description="Free-text question or search over your CVs, interview feedback, and research."),
+    ],
+    max_chunks: Annotated[int, Field(description="Maximum number of matching chunks to return.")] = 8,
+) -> list[dict[str, Any]] | str:
+    """Semantic + full-text search over your saved documents' content.
+
+    Returns ranked chunks with a similarity score and a reference back to the source
+    document (id, title, type) - no generated answer, just the matching passages. Use
+    this when you want the raw source material; use no other tool for a synthesized
+    answer with citations.
+    """
+    return await _run(handlers.search_knowledge_base, query=query, max_chunks=max_chunks)
+
+
+@mcp.tool()
+async def match_job(
+    job_id: Annotated[int, Field(description="The job's id, e.g. from add_job or search_jobs.")],
+) -> dict[str, Any] | str:
+    """Analyze how well your saved CV/experience documents fit a specific job.
+
+    Retrieves the CV and experience passages most relevant to the job's description
+    and produces a fit analysis (matching qualifications, gaps, overall recommendation)
+    with citations back to the source documents.
+    """
+    return await _run(handlers.match_job, job_id=job_id)
+
+
 def main() -> None:
     mcp.run(transport="stdio")
 

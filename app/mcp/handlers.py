@@ -18,7 +18,8 @@ from app.models.job import Job
 from app.schemas.application import ApplicationCreate, ApplicationUpdate
 from app.schemas.document import DocumentCreate
 from app.schemas.job import JobCreate, JobUpdate
-from app.services import application_service, document_service, job_service
+from app.services import answer_service, application_service, document_service, job_service, retrieval_service
+from app.services.answer_service import JobNotFoundError
 
 
 class ToolError(Exception):
@@ -183,3 +184,37 @@ async def list_documents(db: AsyncSession, doc_type: str | None = None) -> list[
         }
         for d in documents
     ]
+
+
+async def search_knowledge_base(db: AsyncSession, query: str, max_chunks: int = 8) -> list[dict[str, Any]]:
+    results = await retrieval_service.hybrid_search(db, query, max_chunks=max_chunks)
+    return [
+        {
+            "chunk_id": r.chunk_id,
+            "document_id": r.document_id,
+            "document_title": r.document_title,
+            "document_type": r.document_type,
+            "content": r.content,
+            "score": r.rrf_score,
+        }
+        for r in results
+    ]
+
+
+async def match_job(db: AsyncSession, job_id: int) -> dict[str, Any]:
+    try:
+        result = await answer_service.match_job_to_profile(db, job_id)
+    except JobNotFoundError as exc:
+        raise ToolError(str(exc)) from exc
+    return {
+        "answer": result.answer,
+        "citations": [
+            {
+                "document_id": c.document_id,
+                "document_title": c.document_title,
+                "document_type": c.document_type,
+                "chunk_id": c.chunk_id,
+            }
+            for c in result.citations
+        ],
+    }

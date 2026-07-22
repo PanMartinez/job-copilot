@@ -1,8 +1,31 @@
+from types import SimpleNamespace
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.mcp import handlers
 from app.mcp.handlers import ToolError
+from app.models.document import Document, DocumentChunk, DocumentType
+from app.rag.embeddings import EmbeddingProvider
+from app.schemas.application import ApplicationCreate
+from app.services import application_service
+
+_EMBEDDING_DIM = 1536
+_VECTOR = [1.0] + [0.0] * (_EMBEDDING_DIM - 1)
+
+
+class _FakeEmbeddingProvider(EmbeddingProvider):
+    async def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        return [_VECTOR for _ in texts]
+
+
+class _FakeAnthropicClient:
+    def __init__(self) -> None:
+        self.messages = SimpleNamespace(create=self._create)
+
+    async def _create(self, **kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(content=[SimpleNamespace(type="text", text="Fake answer [1].")])
+
 
 pytestmark = pytest.mark.asyncio
 
@@ -51,9 +74,6 @@ async def test_search_jobs_no_matches(db_session: AsyncSession) -> None:
 
 
 async def test_get_pipeline_groups_by_status(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session, title="Platform Engineer", company="Beta Inc")
     await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"], notes="Applied via referral")
@@ -69,9 +89,6 @@ async def test_get_pipeline_groups_by_status(db_session: AsyncSession) -> None:
 
 
 async def test_update_application_status(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session)
     application = await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"])
@@ -82,9 +99,6 @@ async def test_update_application_status(db_session: AsyncSession) -> None:
 
 
 async def test_update_application_preserves_notes_when_not_given(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session)
     application = await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"], notes="Original note")
@@ -95,9 +109,6 @@ async def test_update_application_preserves_notes_when_not_given(db_session: Asy
 
 
 async def test_update_application_sets_notes_when_given(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session)
     application = await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"])
@@ -180,9 +191,6 @@ async def test_apply_to_job_syncs_job_status(db_session: AsyncSession) -> None:
 
 
 async def test_update_application_syncs_job_status(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session)
     application = await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"])
@@ -200,9 +208,6 @@ async def test_update_application_not_found(db_session: AsyncSession) -> None:
 
 
 async def test_update_application_invalid_status(db_session: AsyncSession) -> None:
-    from app.schemas.application import ApplicationCreate
-    from app.services import application_service
-
     job = await _add_job(db_session)
     application = await application_service.create_application(
         db_session, ApplicationCreate(job_id=job["id"])
@@ -242,3 +247,62 @@ async def test_list_documents_filters_by_type(db_session: AsyncSession) -> None:
 async def test_list_documents_invalid_type(db_session: AsyncSession) -> None:
     with pytest.raises(ToolError, match="not a valid document type"):
         await handlers.list_documents(db_session, doc_type="not_a_type")
+
+
+async def test_search_knowledge_base_returns_matching_chunks(
+    db_session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("app.rag.embeddings.get_embedding_provider", lambda: _FakeEmbeddingProvider())
+
+    document = Document(type=DocumentType.CV, title="My CV", content="placeholder")
+    db_session.add(document)
+    await db_session.commit()
+    db_session.add(
+        DocumentChunk(
+            document_id=document.id,
+            chunk_index=0,
+            content="Kubernetes deployment experience.",
+            embedding=_VECTOR,
+        )
+    )
+    await db_session.commit()
+
+    results = await handlers.search_knowledge_base(db_session, query="kubernetes")
+
+    assert len(results) == 1
+    assert results[0]["document_id"] == document.id
+    assert results[0]["document_title"] == "My CV"
+
+
+async def test_match_job_produces_fit_analysis(
+    db_session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+
+    monkeypatch.setattr("app.rag.embeddings.get_embedding_provider", lambda: _FakeEmbeddingProvider())
+    monkeypatch.setattr("app.services.answer_service.AsyncAnthropic", lambda: _FakeAnthropicClient())
+
+    document = Document(type=DocumentType.CV, title="My CV", content="placeholder")
+    db_session.add(document)
+    await db_session.commit()
+    db_session.add(
+        DocumentChunk(
+            document_id=document.id,
+            chunk_index=0,
+            content="Extensive Kubernetes experience.",
+            embedding=_VECTOR,
+        )
+    )
+    await db_session.commit()
+
+    job = await _add_job(db_session, title="Platform Engineer", company="Acme")
+
+    result = await handlers.match_job(db_session, job_id=job["id"])
+
+    assert result["answer"] == "Fake answer [1]."
+    assert len(result["citations"]) == 1
+    assert result["citations"][0]["document_id"] == document.id
+
+
+async def test_match_job_not_found(db_session: AsyncSession) -> None:
+    with pytest.raises(ToolError, match="No job found"):
+        await handlers.match_job(db_session, job_id=999999)

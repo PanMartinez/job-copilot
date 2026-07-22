@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     db_host: str
     db_port: int
 
+    openai_api_key: str | None = None
+    anthropic_api_key: str | None = None
+
+    celery_broker_url: str = "redis://localhost:6379/1"
+    celery_result_backend: str = "redis://localhost:6379/2"
+    celery_task_always_eager: bool = False
+
     model_config = SettingsConfigDict(env_file="app/config/.env", env_file_encoding="utf-8", extra="ignore")
 
     @property

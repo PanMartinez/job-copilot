@@ -30,6 +30,8 @@ Postgres instance (see the repo's [Quickstart](../../README.md#quickstart)).
 | `update_application(id, status, notes?)` | Move an application to a new pipeline stage. |
 | `add_document(type, title, content)` | Store a CV, interview feedback, or research note. |
 | `list_documents(type?)` | List stored documents, optionally filtered by type. |
+| `search_knowledge_base(query, max_chunks?)` | Hybrid (semantic + full-text) search over your documents; returns ranked chunks with source references. |
+| `match_job(job_id)` | Retrieve relevant CV/experience chunks for a job and produce a cited fit analysis. |
 
 Each tool has a full description and a typed input schema (see `server.py`) — that's
 what the LLM reads to decide when and how to call it. Errors (bad input, not found,
